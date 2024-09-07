@@ -102,31 +102,47 @@ namespace UniversityDatabase
             //objekat connection, on nas povezuje na bazu uz pomoc konekcionog stringa
             SqlConnection connection = new SqlConnection(connectionString);
 
-            //PrintStudentRows(connection);
+            using (connection)
+            {
 
-            //PrintStudentsAndCourses(connection);          
+                /*using omogucava da se svi resursi connection objekta automatski zatvore
+               * nakon njegovog koriscenja, tj. nakon using bloka. Zato posle nema nigde zatvaranja konekcije ka bazi.
+               * 
+               * II nacin bez koriscenja using bloka jeste da na pocetku napisemo connection.Open i nakon
+               * poziva funkcija napisati connection.Close() da bi zatvorili konekciju ka bazi
+               * */
 
-            //InsertStudent(connection); // u ovoj funkciji smo otvorili konekciju i zatvorili je
+                //konekciju cemo drzati stalno otvorenom dokle god pozivamo funkcije koje rade sa bazom
 
-            //UpdateStudent(connection);
+                connection.Open(); // otvoranje konekcije konekciju
 
-            //DeleteStudent(connection);
+                //da biste testirali neku funkcije samo sklonite komentare
 
-            /*int scalar = ReturnScalar(connection);
+                //PrintStudentRows(connection);
 
-            System.Diagnostics.Debug.WriteLine("Scalar Value: " + scalar);
-            
-            */
+                //PrintStudentsAndCourses(connection);          
 
-            //PrintExamsCustom(connection, 1);
+                //InsertStudent(connection); // u ovoj funkciji smo otvorili konekciju i zatvorili je
 
-            //InsertStudentCustom(connection, "Peric3", "Pera3", 3);
+                //UpdateStudent(connection);
 
-            //UpdateStudentCustom(connection, "Peric", "Pera", 2, 9);
+                //DeleteStudent(connection);
 
-            //DeleteStudentCustom(connection, 1016);
+                /*int scalar = ReturnScalar(connection);
 
+                System.Diagnostics.Debug.WriteLine("Scalar Value: " + scalar);
 
+                */
+
+                //PrintExamsCustom(connection, 1);
+
+                //InsertStudentCustom(connection, "Peric3", "Pera3", 3);
+
+                //UpdateStudentCustom(connection, "Peric", "Pera", 2, 9);
+
+                //DeleteStudentCustom(connection, 1016);
+
+            }
 
            
         }
@@ -147,12 +163,6 @@ namespace UniversityDatabase
         {
 
             //funkcija stampa rezultate select upita
-
-            using (connection)
-            { /*using omogucava da se svi resursi connection objekta automatski zatvore
-               * nakon njegovog koriscenja, tj. nakon using bloka. Zato posle nema nigde connection.Close()
-               * */
-
 
                 //objekat command prihvata sql upit u obliku stringa i connection objekat
 
@@ -176,7 +186,8 @@ namespace UniversityDatabase
                   "SELECT StudentID, LastName, FirstName, Year" +
                   " FROM Students;",
                   connection);
-                connection.Open(); // otvori konekciju
+               
+
 
                 //DataReader objekat sluzi za izvrsavanje upita sa SELECT naredbom,
                 //Ovo je SQL varijanta DataReader-a, takozvani SqlDataReader
@@ -203,11 +214,17 @@ namespace UniversityDatabase
                         //stampano liniju radi lepseg ispisa izmedju redova podataka
                         System.Diagnostics.Debug.WriteLine("------------------------------------------------");
 
-                        /*//II Nacin ispisa je sa obicnim nadovezivanjem stringova
-                        System.Diagnostics.Debug.WriteLine("ID:" + reader[0] + " LastName:" + reader[1] + " FirstName:" + reader[2] + " Year: " + reader[3]);
-                        System.Diagnostics.Debug.WriteLine("------------------------------------------------");
-                        */
-                    }
+                    /*//II Nacin ispisa je sa obicnim nadovezivanjem stringova
+                    System.Diagnostics.Debug.WriteLine("ID:" + reader[0] + " LastName:" + reader[1] + " FirstName:" + reader[2] + " Year: " + reader[3]);
+                    System.Diagnostics.Debug.WriteLine("------------------------------------------------");
+                    */
+
+
+                    //III Nacin ispisa je sa $ notacijom
+                    System.Diagnostics.Debug.WriteLine($"ID: {reader[0]}  LastName:  {reader[1]}  FirstName: {reader[2]}  Year:  {reader[3]});");
+                    System.Diagnostics.Debug.WriteLine("-------------------------------------------------------");
+
+                }
                 }
                 else
                 {
@@ -215,7 +232,7 @@ namespace UniversityDatabase
                     System.Diagnostics.Debug.WriteLine("No rows found");
                 }
                 reader.Close(); // obavezno zatvoriti reader
-            }
+            
         }
 
         /*NAPOMENA 1: Ako niste sigurni da li vam je upit tacan mozete ga testirati u Visual Studiju
@@ -225,8 +242,7 @@ namespace UniversityDatabase
         
          NAPOMENA 2(try-catch): Sve metode koje smo koristili tj. Read(), ExecuteReader(), Open() i mnoge
         druge mogu ispaliti razne izuzetke i tacnije bi bilo sve ove kodove ubaciti u try-catch blok.
-        Sada dok ucimo nisam to pisao da vam se dodatno ne bi zakrcio kod koji citate. Na odogvaranju
-        i vezbanju cu traziti da sve obuhvatite try catch naredbama.*/
+        Sada dok ucimo nisam to pisao da vam se dodatno ne bi zakrcio kod koji citate.*/
 
         /*Do sada smo koristili objekte connection, command i DataReader.
          * Ali sta primecujete?
@@ -254,14 +270,12 @@ namespace UniversityDatabase
         {
 
             //funkcija stampa rezultate dva select upita
-
-            using (connection)
-            {
+           
                 SqlCommand command = new SqlCommand(
                   "SELECT StudentID, LastName, FirstName FROM Students;" +
                   "SELECT CourseID, Title, Points FROM Courses",
                   connection);
-                connection.Open();
+                
 
                 SqlDataReader reader = command.ExecuteReader();
 
@@ -284,7 +298,7 @@ namespace UniversityDatabase
                 }
 
                 reader.Close();
-            }
+            
         }
 
 
@@ -304,48 +318,40 @@ namespace UniversityDatabase
             * Priroda nase baze je takva da se ID svake tabele(primarni kljuc)
             * unosi automatski tj. mi ga NE unosimo.
             * */
-            using (connection)
-            {
-
+            
                 SqlCommand command = new SqlCommand("INSERT INTO Students (LastName, FirstName, Year)" +
                                                     " VALUES ('Peric', 'Pera', 3);", connection);
                 //vodite racuna da smo napravili razmak izmedju dva reda tj. VALUES mora biti odvojeno od ) iz prethodnog reda!
-                connection.Open();
+                
                 /*metod ExecuteNonQuery() objekta command sluzi za izvrsavanje upita
                  * koji ne vracaju redove iz tabele(INSERT, UPDATE, DELETE, ...)
                  * */
                 command.ExecuteNonQuery();
 
 
-            }
+            
         }
         //1g - Napisati funkciju koja azurira nekog studenta
         void UpdateStudent(SqlConnection connection)
         { //funkcija menja podatke postojeceg studenta, where uslov je preko ID jer je ID Primary Key(Primarni Kljuc) tj. jedinstven je
-            using (connection)
-            {
+            
                 SqlCommand command = new SqlCommand("UPDATE Students " +
                                                         "SET LastName = 'Mikic' , FirstName = 'Mika', Year = 2 " +
                                                             "WHERE StudentID = 10", connection);
-
-                connection.Open();
-
+                
                 command.ExecuteNonQuery();
-            }
+            
         }
 
         //1h - Napisati funkciju koja brise nekog studenta
         void DeleteStudent(SqlConnection connection)
         { // funkcija brise studenta
-            using (connection)
-            {
+            
                 SqlCommand command = new SqlCommand("DELETE from Students " +
-                                                        "WHERE StudentID = 10", connection);
-
-                connection.Open();
+                                                        "WHERE StudentID = 10", connection);                
 
                 command.ExecuteNonQuery();
-            }
+            
         }
 
         //1i - Napisati funkciju koja vraca jednu vrednost na osnovu nekog select upita.
@@ -354,13 +360,13 @@ namespace UniversityDatabase
 
             int scalar; // ovde cuvamo tu jednu vrednost(skalar)
 
-            using (connection)
-            { // vraca broj studenata ciji ID je veci od 5
+            
+             // vraca broj studenata ciji ID je veci od 5
                 SqlCommand command = new SqlCommand("SELECT COUNT(StudentID) " +
                                                         "FROM Students " +
                                                         "WHERE StudentID > 5", connection);
 
-                connection.Open();
+                
 
                 /* metod ExecuteScalar() objekta command izvrsava sql upite koji vracaju
                  * tacno jednu vrednost(skalar) za razliku od ostalih select upita koji
@@ -368,7 +374,7 @@ namespace UniversityDatabase
                  * prvu kolonu prvog reda rezultata select upita.
                  */
                 scalar = (int)command.ExecuteScalar();
-            }
+            
 
             return scalar;
         }
@@ -390,9 +396,7 @@ namespace UniversityDatabase
         //1j - Napisati funkciju koja moze da ubaci bilo kakvog studenta odredjenog C# argumentima funkcije
         void InsertStudentCustom(SqlConnection connection, string prezime, string ime, int year)
         {
-            using (connection)
-            {
-
+            
                 string query = "INSERT INTO Students (LastName, FirstName, Year)" +
                                                     " VALUES ( '" + prezime + "', '" + ime + "', " + year + " );";
 
@@ -409,14 +413,11 @@ namespace UniversityDatabase
 
                 //SqlCommand command2 = new SqlCommand(query2, connection);
 
-
-                connection.Open();
-
                 command.ExecuteNonQuery();
 
                 //command2.ExecuteNonQuery();
 
-            }
+            
         }
 
 
@@ -425,40 +426,33 @@ namespace UniversityDatabase
         void UpdateStudentCustom(SqlConnection connection, string prezime, string ime, int year, int ID)
         {
             //funkcija update-uje proizvoljnog studenta na proizvoljan nacin
-            using (connection)
-            {
+            
                 SqlCommand command = new SqlCommand("UPDATE Students " +
                                                         "SET LastName = '" + prezime + "' , FirstName = '" + ime + "', Year = " + year + " " +
                                                             "WHERE StudentID = " + ID, connection);
                 //vodite racuna o razmacima izmedju year i WHERE, zato smo ubacili onaj jedan space
-                connection.Open();
+                
 
                 command.ExecuteNonQuery();
-            }
+            
         }
 
 
         //1l - Napisati funkciju koja moze da obrise bilo kog studenta tj. id se prosledjuje kao argument
         void DeleteStudentCustom(SqlConnection connection, int ID)
         { // funkcija brise studenta odredjenog ID-a prosledjenog kao argument
-            using (connection)
-            {
+            
                 SqlCommand command = new SqlCommand("DELETE from Students " +
                                                         "WHERE StudentID = " + ID, connection);
 
-                connection.Open();
-
                 command.ExecuteNonQuery();
-            }
+            
         }
 
         //1m- Napisati funkciju koja ispisuje sve info o ispitima cija je ocena veca od grade, grade je argument
         void PrintExamsCustom(SqlConnection connection, int grade)
         {
-            using (connection)
-            {
-                connection.Open();
-
+                            
                 string query = "SELECT *" +
                                 " FROM Exams " +
                                 "WHERE Grade > " + grade + " ;";
@@ -481,7 +475,7 @@ namespace UniversityDatabase
                     System.Diagnostics.Debug.WriteLine("No rows found");
                 }
                 reader.Close();
-            }
+            
 
         }
 
