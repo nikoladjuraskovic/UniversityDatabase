@@ -39,29 +39,34 @@ namespace UniversityDatabase
             //objekat connection, on nas povezuje na bazu uz pomoc konekcionog stringa
             SqlConnection connection = new SqlConnection(connectionString);
 
-            //PrintStudentsParameters(connection, 3);
+            using (connection)
+            {
+                connection.Open();
 
-            //PrintExamsParameters(connection, 1, "Calculus");
 
-            //InsertStudentParameter(connection, "Pera2", "Peric2", 4);
+                //PrintStudentsParameters(connection, 3);
 
-            //UpdateStudentParameter(connection, 3, 16);
+                //PrintExamsParameters(connection, 1, "Calculus");
 
-            //DeleteStudentParameter(connection, 16);
+                //InsertStudentParameter(connection, "Pera2", "Peric2", 4);
 
-            //PrintFromDataAdapterDataTableParameter(connection, 1);
+                //UpdateStudentParameter(connection, 3, 16);
 
-            //InsertStudentDataAdapterParameter(connection, "Pera", "Peric", 1);
+                //DeleteStudentParameter(connection, 16);
 
-            //UpdateStudentDataAdapterParameter(connection, 2, 8);
+                //PrintFromDataAdapterDataTableParameter(connection, 1);
 
-            //DeleteStudentDataAdapterParameter(connection, 10);
+                //InsertStudentDataAdapterParameter(connection, "Pera", "Peric", 1);
+
+                //UpdateStudentDataAdapterParameter(connection, 2, 8);
+
+                //DeleteStudentDataAdapterParameter(connection, 10);
+
+            }
         }
 
         void PrintStudentsParameters(SqlConnection connection, int year)
-        {
-            using (connection)
-            {
+        {           
                 //konstruisemo parametar
                 SqlParameter parameter = new SqlParameter();
 
@@ -89,7 +94,7 @@ namespace UniversityDatabase
                 Ovime smo u sql naredbu(komandu) dodali nas parametar.*/
                 command.Parameters.Add(parameter);
                 //zatim kao i do sada vrsimo ispis.
-                connection.Open();
+                
 
                 SqlDataReader reader = command.ExecuteReader();
 
@@ -109,7 +114,7 @@ namespace UniversityDatabase
                     System.Diagnostics.Debug.WriteLine("No rows found");
                 }
                 reader.Close();
-            }
+            
 
 
         }
@@ -119,8 +124,7 @@ namespace UniversityDatabase
          */
         void PrintExamsParameters(SqlConnection connection, int grade, string courseTitle)
         {
-            using (connection)
-            {
+            
                 //potrebna su nam 2 parametra
                 SqlParameter p1 = new SqlParameter();
                 SqlParameter p2 = new SqlParameter();
@@ -145,7 +149,7 @@ namespace UniversityDatabase
                 command.Parameters.Add(p1);
                 command.Parameters.Add(p2);
                 //probajte da zamenite mesta p1 i p2 i videcete da radi isto
-                connection.Open();
+                
 
                 SqlDataReader reader = command.ExecuteReader();
 
@@ -168,14 +172,12 @@ namespace UniversityDatabase
 
 
 
-            }
+            
         }
         /*3c - ubaciti custom studenta u bazu koriscenjem parametara*/
         void InsertStudentParameter(SqlConnection connection, string Name, string LastName, int year)
-        {
-            using (connection)
-            {
-                connection.Open();
+        {           
+                
 
                 SqlParameter p1 = new SqlParameter();
                 SqlParameter p2 = new SqlParameter();
@@ -201,15 +203,12 @@ namespace UniversityDatabase
                 command.ExecuteNonQuery();
 
 
-            }
+            
         }
         //3d - Proizvoljno azurirati godinu studenta ciji id je prosledjen(id i year su parametri)
         void UpdateStudentParameter(SqlConnection connection, int year, int id)
         {
-            using (connection)
-            {
-                connection.Open();
-
+ 
                 SqlParameter p1 = new SqlParameter();
                 SqlParameter p2 = new SqlParameter();
 
@@ -230,14 +229,12 @@ namespace UniversityDatabase
 
                 command.ExecuteNonQuery();
 
-            }
+            
         }
         //3e - Obrisati bilo kog studenta ciji id se prosledjuje kao parametar
         void DeleteStudentParameter(SqlConnection connection, int id)
         {
-            using (connection)
-            {
-                connection.Open();
+                          
 
                 SqlParameter p1 = new SqlParameter();
 
@@ -253,7 +250,7 @@ namespace UniversityDatabase
                 command.Parameters.Add(p1);
 
                 command.ExecuteNonQuery();
-            }
+            
         }
 
         /* DOMACI(parametarske varijante prethodnih domacih):
@@ -283,12 +280,7 @@ namespace UniversityDatabase
         {
 
             System.Diagnostics.Debug.WriteLine("--PrintFromDataAdapterv2--");
-
-            using (connection)
-            {
-
-                connection.Open();
-
+            
                 //napravimo parametar
                 SqlParameter p = new SqlParameter();
 
@@ -321,16 +313,13 @@ namespace UniversityDatabase
                     System.Diagnostics.Debug.WriteLine("---------------------------------------");
                 }
 
-            }
+            
 
         }
         //3k - napisati funkciju koja unosi bilo kakvog studenta ciji argumenti ce biti parametri
         void InsertStudentDataAdapterParameter(SqlConnection connection, string name, string surname, int year)
         {
-
-            using (connection)
-            {
-                connection.Open();
+           
 
                 /*Rekli smo da se konstruktoru DataAdapteta prosledjuje upit koji se odmah
                  * upisuje u SelectCommand property. Ako zelimo da unesemo podatke u bazi nama
@@ -338,8 +327,6 @@ namespace UniversityDatabase
                 dohvatiti podatke iz baze select upitom i onda dodati insert upit koji ce da
                ubaci podatke u RAM(program tj. c# objektima),
                 tj. jos uvek nismo izmene uneli u bazu(disk).*/
-
-
 
 
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(
@@ -398,7 +385,7 @@ namespace UniversityDatabase
                 /*azuriramo bazu metodom Update(koristi se i za Delete i Update upite)*/
                 dataAdapter.Update(studentTable);
 
-            }
+            
 
         }
         //3l - Napisati funkciju koja azurira godinu studenta koristeci DataAdapter, godina i id su parametri
@@ -406,10 +393,7 @@ namespace UniversityDatabase
         void UpdateStudentDataAdapterParameter(SqlConnection connection, int year, int id)
         {
             //funkcija vrsi izmenu podataka
-            using (connection)
-            {
-                connection.Open();
-
+            
                 SqlDataAdapter dataAdapter = new SqlDataAdapter(
                   "SELECT * FROM Students",
                   connection);
@@ -466,16 +450,13 @@ namespace UniversityDatabase
 
                 dataAdapter.Update(studentTable); //azuriramo bazu
 
-            }
+            
 
         }
         //3m Napisati funkciju koja brise studenta sa datim id(parametar) preko DataAdaptera
         void DeleteStudentDataAdapterParameter(SqlConnection connection, int id)
         {
-            using (connection)
-            {
-                connection.Open();
-
+            
                 SqlDataAdapter dataAdapter = new SqlDataAdapter("SELECT * FROM Students", connection);
 
                 DataTable studentTable = new DataTable();
@@ -508,8 +489,7 @@ namespace UniversityDatabase
 
                 dataAdapter.Update(studentTable); //brisanje reda koji hocemo iz baze
 
-
-            }
+            
         }
 
 
