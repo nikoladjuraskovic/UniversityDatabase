@@ -116,7 +116,7 @@ namespace UniversityDatabase
 
                 connection.Open(); // otvoranje konekcije konekciju
 
-                //da biste testirali neku funkcije samo sklonite komentare
+                //da biste testirali neku funkcije samo sklonite komentare sa poziva funkcije
 
                 //PrintStudentRows(connection);
 

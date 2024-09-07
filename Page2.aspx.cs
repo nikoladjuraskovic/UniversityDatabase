@@ -38,19 +38,24 @@ namespace UniversityDatabase
             //objekat connection, on nas povezuje na bazu uz pomoc konekcionog stringa
             SqlConnection connection = new SqlConnection(connectionString);
 
-            //Populate(connection);
+            using (connection)
+            {
 
-            //PopulateWithPK(connection);
+                connection.Open();
 
-            //GetStudentsSchemaInfo(connection);
+                //Populate(connection);
 
-            //PrintFromDataAdapter(connection);
+                //PopulateWithPK(connection);
 
-            //PrintUsingDataTableAndDataSet(connection);          
+                //GetStudentsSchemaInfo(connection);
 
-            //PrintMultipleTables(connection);
+                //PrintFromDataAdapter(connection);
 
+                //PrintUsingDataTableAndDataSet(connection);          
 
+                //PrintMultipleTables(connection);
+
+            }
         }
         
         //2a - Napisati funkciju koja preko DataAdapter-a dohvata id i prezimena svih studenata
@@ -119,13 +124,11 @@ namespace UniversityDatabase
         void GetStudentsSchemaInfo(SqlConnection connection)
         {
             //funkcija ispisuje podatke o tabeli iz baze
-
-            using (connection)
-            {
+           
                 SqlCommand command = new SqlCommand(
                   "SELECT StudentID, LastName FROM Students;",
                   connection);
-                connection.Open();
+                
 
                 SqlDataReader reader = command.ExecuteReader();
                 DataTable schemaTable = reader.GetSchemaTable(); //vrati shemu tabele
@@ -142,7 +145,7 @@ namespace UniversityDatabase
                 }
 
                 reader.Close();
-            }
+            
         }
 
 
@@ -169,7 +172,7 @@ namespace UniversityDatabase
 
             //metod Fill automatski otvara i zatvara konekciju, tako da je moramo opet otvoriti
 
-            connection.Open(); // otvaramo konekciju
+            
 
             //stampamo podatke iz DataSet dohvacene upitom queryString
             SqlDataReader reader = command.ExecuteReader();
@@ -189,7 +192,7 @@ namespace UniversityDatabase
             }
             reader.Close();
 
-            connection.Close(); // zatvaramo konekciju
+            
         }
         /*BITNA NAPOMENA: Ovim nacinom u 2d zadatku nista novo nismo uradili, tj. samo smo dohvatili
          * sql komandu i odstampali je kao i ranije odnosno nismo koristili DataSet.
@@ -209,11 +212,6 @@ namespace UniversityDatabase
             /*istovremeno cemo pokazati dva nacina stampanja podataka koristeci
              DataTable i DataSet*/
 
-
-            using (connection)
-            {
-
-                connection.Open();
 
                 string queryString =
                     "SELECT StudentID, LastName FROM Students";
@@ -267,17 +265,14 @@ namespace UniversityDatabase
 
                 }
 
-            }
+            
 
         }
 
         //2f - napisati funkciju koja stampa rezultat dva upita sa 2 razlicite tabele preko DataSet
         void PrintMultipleTables(SqlConnection connection)
         {
-            using (connection)
-            {
-                connection.Open();
-
+            
                 //2 select upita
                 string doubleQuery = "SELECT StudentID, LastName, FirstName FROM Students; " +
                   "SELECT CourseID, Title, Points FROM Courses";
@@ -324,7 +319,7 @@ namespace UniversityDatabase
 
                 }
 
-            }
+            
         }
 
         /* Razlika izmedju DataReader i DataAdapter-a.
